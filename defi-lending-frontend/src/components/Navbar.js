@@ -7,25 +7,31 @@ import EINRAbi from "../contracts/EINRToken.json";
 import EGoldAbi from "../contracts/EGoldToken.json";
 import LendingPoolABI from "../contracts/LendingPool.json";
 import LPTokenABI from "../contracts/LPToken.json"
+import { useDispatch } from "react-redux";
+import { updateABI } from "../reducers/stateReducer";
+
+
 
 
 const Navbar = () => {
-  const { active, account, library, connector, activate, deactivate } =
+  const dispatch = useDispatch();
+
+  const { active, account, library, activate, deactivate } =
     useWeb3React();
 
-  async function balanceFetch() {
-    try {
-      if (active) {
-        console.log(library);
-        const balance = await library.eth.getBalance(account);
-        console.log(balance);
-        const balanceToken = await library.utils.fromWei(balance);
-        console.log(balanceToken);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  // async function balanceFetch() {
+  //   try {
+  //     if (active) {
+  //       console.log(library);
+  //       const balance = await library.eth.getBalance(account);
+  //       console.log(balance);
+  //       const balanceToken = await library.utils.fromWei(balance);
+  //       console.log(balanceToken);
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }
 
   async function connect() {
     try {
@@ -59,34 +65,31 @@ const Navbar = () => {
     connectWalletOnPageLoad();
   }, []);
 
-  const Connectinstance = async () => {
+  const ConnectInstance = async () => {
     console.log(library);
     const networkID = await library.eth.net.getId();
-    //EINR Instance 
     const networkDataEINR = EINRAbi.networks[networkID];
     console.log(networkDataEINR);
     const EINRInstance = await new library.eth.Contract(EINRAbi.abi,networkDataEINR.address);
     console.log(EINRInstance);
-    const balanceOfEINR = await EINRInstance.methods.balanceOf(account).call();
-    const formatBalEINR = library.utils.fromWei(balanceOfEINR)
-    console.log(formatBalEINR);
+    
     
     //EGold Instance
     const networkDataEGold = EGoldAbi.networks[networkID];
     console.log(networkDataEGold);
     const EGoldInstance = await new library.eth.Contract(EGoldAbi.abi, networkDataEGold.address);
     console.log(EGoldInstance);
-    const balanceOfEGold = await EGoldInstance.methods.balanceOf(account).call();
-    const formatBalEGold = library.utils.fromWei(balanceOfEGold);
-    console.log(formatBalEGold);
+    // const balanceOfEGold = await EGoldInstance.methods.balanceOf(account).call();
+    // const formatBalEGold = library.utils.fromWei(balanceOfEGold);
+    // console.log(formatBalEGold, "eGold Balance");
     
     //lending Pool Instance 
     const networkLendingPool = LendingPoolABI.networks[networkID];
     console.log(networkLendingPool);
     const LendingPoolInstance = await new library.eth.Contract(LendingPoolABI.abi, networkLendingPool.address);
     console.log(LendingPoolInstance);
-    const totalBalanceEINRToken = await LendingPoolInstance.methods.getTotalOfSupplyEINRPool().call();
-    console.log(totalBalanceEINRToken);
+    // const totalBalanceEINRToken = await LendingPoolInstance.methods.getTotalOfSupplyEINRPool().call();
+    // console.log(totalBalanceEINRToken, "Total Supply");
    
     // LP token instance 
     const networkLPToken = LPTokenABI.networks[networkID];
@@ -94,13 +97,23 @@ const Navbar = () => {
     const LPTokenInstance = await new library.eth.Contract(LPTokenABI.abi, networkLPToken.address);
     console.log(LPTokenInstance);
     // const balanceOfLPToken = await LPTokenInstance.eth.getBalanceOfLPtoken().call();
-    // console.log(balanceOfLPToken);
-    
+    // console.log(balanceOfLPToken); 
+
+    dispatch(updateABI({
+      EINRAbi:EINRInstance,
+      EGoldAbi:EGoldInstance,
+      LendingPoolAbi: LendingPoolInstance, 
+      LPTokenAbi:LPTokenInstance,
+      EINRContractAddress:networkDataEINR.address,
+      EGOLDContractAddress:networkDataEGold.address,
+      LendingContractAddress: networkLendingPool.address,
+      LPTokenAddress: networkLPToken.address
+    }))  
   };
 
   useEffect(() => {
     if (active) {
-      Connectinstance();
+      ConnectInstance();
     }
   }, [active]);
 
@@ -131,30 +144,26 @@ const Navbar = () => {
               </li>
             </ul>
             <button
+              type="button"
+              class="btn btn-primary"
               onClick={connect}
-              className="py-2 mt-20 mb-4 text-lg font-bold text-black rounded-lg w-56 bg-blue-600 hover:bg-blue-800"
             >
-              Connect to MetaMask
+              Connect MetaMask
             </button>
             {active ? (
               <span>
-                Connected with <b>{account}</b>
+              <b>{account}</b>
               </span>
             ) : (
               <span>Not connected</span>
             )}
-            <button
+             <button
+              type="button"
+              class="btn btn-primary"
               onClick={disconnect}
-              className="py-2 mt-40 mb-4 text-lg font-bold text-black rounded-lg w-56 bg-blue-600 hover:bg-blue-800"
             >
-              Disconnect
-            </button>
-            <button
-              onClick={balanceFetch}
-              className="py-2 mt-20 mb-4 text-lg font-bold text-black rounded-lg w-56 bg-blue-600 hover:bg-blue-800"
-            >
-              Balance
-            </button>
+            Disconnect
+            </button>  
           </div>
         </div>
       </nav>
