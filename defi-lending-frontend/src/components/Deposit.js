@@ -1,142 +1,112 @@
+// eslint-disable-next-line react-hooks/exhaustive-deps
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useWeb3React } from "@web3-react/core";
 import "../styles/Deposit.css";
+import Borrow from "./Borrow";
+import UserKYC from './UserKYC'
+import { Link } from "react-router-dom";
 
 const Deposit = () => {
   const [value, setValue] = useState();
-  const { account } = useWeb3React();
+  const { account, library } = useWeb3React();
   const EINRABI = useSelector((state) => state.token.EINRAbi);
   const LendingPoolABI = useSelector((state) => state.token.LendingPoolAbi);
   const EGoldABI = useSelector((state) => state.token.EGoldAbi);
   const lendingPoolContractAddress = useSelector(
     (state) => state.token.LendingContractAddress
   );
-  console.log(EINRABI);
-  const handleInput = (e) => {
+  let [isApproveSupply, setIsApproveSupply] = useState(false);
+  let [kycBool, setKycBool] = useState(false);
+  
+
+  const handleInputSupply = (e) => {
     setValue(e.target.value);
   };
 
   const [formatBalEINR, setFormatBalEINR] = useState(null);
   const [totalSupply, setTotalSupply] = useState();
-  const [formatBalEGold, setFormatEGold] = useState(null);
+  
   const [einrDeposit, setEinrDeposited] = useState(null);
-  const [egoldDeposit, setEgoldDeposited] = useState(null);
-  const [einrBorrow, setEINRBorrow] = useState(null);
 
   const getBalanceEINR = async () => {
-    //console.log(EINRABI);
     const balanceOfEINR = await EINRABI.methods.balanceOf(account).call({
       from: account,
     });
-    setFormatBalEINR(balanceOfEINR);
-    //console.log(formatBalEINR, "EINR user balance");
+    setFormatBalEINR(library.utils.fromWei(balanceOfEINR));
   };
-  const getBalancEGold = async () => {
-    const balanceOfEGold = await EGoldABI.methods.balanceOf(account).call({
-      from: account,
-    });
-    setFormatEGold(balanceOfEGold);
-  };
-
+  
   const getTotalSupplyBalance = async () => {
-    //console.log(LendingPoolABI)
-    const totalBalanceEINRToken = await LendingPoolABI.methods.getTotalOfSupplyEINRPool().call({
-      from : account
-    });
+    const totalBalanceEINRToken = await LendingPoolABI.methods
+      .getTotalOfSupplyEINRPool()
+      .call({
+        from: account,
+      });
     console.log(totalBalanceEINRToken, "Total Supply");
     setTotalSupply(totalBalanceEINRToken);
-  }
+  };
 
-  //deposit function
-  const supplyEINRAmount = async () => {
+  //deposit approval function
+  const approveEINRAmount = async () => {
     const einrtokenApproval = await EINRABI.methods
-      .approve(lendingPoolContractAddress, value)
+      .approve(lendingPoolContractAddress, library.utils.toWei(value, "ether"))
       .send({
         from: account,
       });
+    setIsApproveSupply(true);
+    console.log(einrtokenApproval)
+  };
+
+  //deposit EINR token
+  const supplyEINRAmount = async () => {
     const depositAmount = await LendingPoolABI.methods
-      .depositeINRToken(value)
+      .depositeINRToken(library.utils.toWei(value, "ether"))
       .send({
         from: account,
       });
     console.log(depositAmount);
-    console.log(einrtokenApproval);
   };
 
   //get balance of User Depositing EINR token:
-  const getEINRDeposited = async() => {
-    const einrDeposited = await LendingPoolABI.methods.getOwnerDepositEINRBalance(account).call({
-      from: account
-    })
-    setEinrDeposited(einrDeposited);  
-  }
-  
-   
-
-  //borrow function
-  const borrowEINRAmount = async () => {
-    const egoldTokenApproval = await EGoldABI.methods
-      .approve(lendingPoolContractAddress, value)
-      .send({
+  const getEINRDeposited = async () => {
+    const einrDeposited = await LendingPoolABI.methods
+      .getOwnerDepositEINRBalance(account)
+      .call({
         from: account,
       });
-    const depositEgoldAmount = await LendingPoolABI.methods
-      .borrowEINRLoan(value)
-      .send({
-        from: account,
-      });
-    console.log(egoldTokenApproval);
-    console.log(depositEgoldAmount);
+    setEinrDeposited(library.utils.fromWei(einrDeposited));
   };
 
-  // get balance of user Depositing EGold Tokens
-  const getGoldDeposited = async() => {
-    const egoldDeposited = await LendingPoolABI.methods.getOwnerEGoldBalance(account).call({
-      from: account
-    })
-    setEgoldDeposited(egoldDeposited);  
-  }
-
-  // get balance of user Borrowing EInr Tokens
-  const getEINRBorrowed = async() => {
-    const einrBorrowed = await LendingPoolABI.methods.getBorrowEINRAmount(account).call({
-      from: account
-    })
-    setEINRBorrow(einrBorrowed);  
-  }
-
-
-
-  //repay with interest amount function
-  const [valueInterest, setValueInterest] = useState(null);
-  const AmountRepayInterest =  async() =>{
-    await LendingPoolABI.methods.getborrowerRepayAmount(value).call({
-      from: account,
-    }).then(e => setValueInterest(e)).catch(err => console.log(err));
-  }
+  const [valWithInt, setValueWithInterest] = useState(null);
+  
 
   //withdraw amount with Interest function
-  const [valWithInt, setValueWithInterest] = useState(null);
-  const AmountWithdrawInterest = async () =>{
-    await LendingPoolABI.methods.getAmountWithInterest(value).call({
-      from: account,
-    }).then(e => setValueWithInterest(e)).catch(err => console.log(err));
-  }
-
-  //repay function
-  const repayEINRAmount = async () => {
-    const repayAmountApproval = await EINRABI.methods
-      .approve(lendingPoolContractAddress, value)
-      .send({
+  const AmountWithdrawInterest = async () => {
+    const updateWithdrawInt = await LendingPoolABI.methods
+      .getAmountWithInterest()
+      .call({
         from: account,
       });
-    const repayAmount = await LendingPoolABI.methods.repayEINRLoan(value).send({
-      from: account,
-    });
-    console.log(repayAmountApproval);
-    console.log(repayAmount);
+    setValueWithInterest(updateWithdrawInt);
+    console.log(updateWithdrawInt);
   };
+  useEffect(() => {
+    if (account && LendingPoolABI) {
+      AmountWithdrawInterest();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [account, LendingPoolABI]);
+
+  useEffect(() => {
+    let interval;
+    if (account !== null) {
+      interval = setInterval(() => {
+        AmountWithdrawInterest();
+      }, 60000);
+    }
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [account, LendingPoolABI]);
 
   //withdraw
   const withDrawEINRAmount = async () => {
@@ -148,97 +118,85 @@ const Deposit = () => {
     console.log(withDrawAmount);
   };
 
-
-
   useEffect(() => {
     if (account && EINRABI && EGoldABI && LendingPoolABI) {
-     getBalanceEINR();
-     getBalancEGold();
-     getTotalSupplyBalance();
-     getEINRDeposited();
-     getGoldDeposited();
-     getEINRBorrowed();
+      getBalanceEINR();
+      getTotalSupplyBalance();
+      getEINRDeposited();
     }
-  }, [account , EINRABI, EGoldABI, LendingPoolABI]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [account, EINRABI, EGoldABI, LendingPoolABI]);
 
   return (
     <>
       <div className="headDetails">Total Supply of EINR : {totalSupply}</div>
 
-      <div className="cardContainer">
+      <div className="card-parent-container">
+        <div className="cardContainer">
         <div className="card">
-          <div class="card-header">Supply Market</div>
+          <div className="card-header">Supply Market</div>
           <div className="card-body">
             <div className="text">EINR Balance of User: {formatBalEINR}</div>
             <h5>APY : 8%</h5>
+            {value > 1000 && (
+              <Link onClick={() => setKycBool(true)} style={{color:"red"}}>Please Do your Kyc</Link>
+            )}
             <input
               type="text"
               name="title"
               className="form-control"
               placeholder="Enter EINR Amount"
-              onChange={handleInput}
-            ></input>
+              onChange={handleInputSupply}
+            ></input> 
+            {kycBool && <button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop" onClick={()=>setKycBool(false)} style = {{background:"red"}}>Click here for KYC Form!!</button>}
+                             {/* kyc form */}
+                             <UserKYC/>
             <button
               type="button"
-              class="btn btn-primary"
-              onClick={supplyEINRAmount}
-            >
-              Supply
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
+              className="btn btn-primary"
               onClick={withDrawEINRAmount}
             >
               Withdraw
             </button>
-            <button type="button" class="btn btn-primary" onClick={AmountWithdrawInterest}>
-              Amount Withdraw Interest
-            </button>
-            <div>
-              <div className ="repayAmount">Withdraw Amount With Interest : {valWithInt}</div>
-              <div className="textDetails">Balance EINR Deposited : {einrDeposit} </div>
-            </div>
-          </div>
-        </div>
 
-        <div className="card">
-          <div class="card-header">Borrow Market</div>
-          <div className="card-body">
-            <div>EGold Balance of User: {formatBalEGold}</div>
-            <h5>APY : 10%</h5>
-            <input
-              type="text"
-              name="title"
-              className="form-control"
-              placeholder="Enter EGold Amount"
-              onChange={handleInput}
-            ></input>
-            <button
-              type="button"
-              class="btn btn-primary"
-              onClick={borrowEINRAmount}
-            >
-              Borrow
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              onClick={repayEINRAmount}
-            >
-              Repay
-            </button>
-            <button type="button" class="btn btn-primary"onClick={AmountRepayInterest}>
-              Amount Repay Interest
-            </button>
             <div>
-              <div className ="repayAmount">Repay Amount With Interest : {valueInterest} </div>
-              <div className="textDetails">Balance EINR Borrowed : {einrBorrow}</div>
-              <div className="textDetails">Balance EGold Deposited : {egoldDeposit} </div>
+              {isApproveSupply ? (
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={supplyEINRAmount}
+                >
+                  Supply
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={approveEINRAmount}
+                >
+                  Approve
+                </button>
+              )}
+            </div>
+            <div>
+              <div className="repayAmount">
+                Withdraw Amount With Interest : {valWithInt}
+              </div>
+              <div className="textDetails">
+                Balance EINR Deposited : {einrDeposit}{" "}
+              </div>
             </div>
           </div>
         </div>
+      
       </div>
+
+
+      <Borrow/>
+
+
+      </div>
+      
     </>
   );
 };

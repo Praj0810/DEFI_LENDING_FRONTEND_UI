@@ -10,6 +10,7 @@ function App() {
       <Router>
         <Navbar/>
         <Deposit/>
+        
       </Router>
     </Provider>  
     );
