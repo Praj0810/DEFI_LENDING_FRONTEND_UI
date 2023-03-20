@@ -8,7 +8,13 @@ const initialState = {
     EINRContractAddress:'',
     EGOLDContractAddress:'',
     LendingContractAddress:'',
-    LPTokenAddress:''
+    LPTokenAddress:'',
+    UserAddress: '',
+    UserName:'',
+    PanCardDetails:'',
+    DocsImg: '',
+    isKycStatusUpdated:false,
+
 };
 
 const tokenReducer = createSlice({
@@ -24,11 +30,22 @@ const tokenReducer = createSlice({
             state.EGOLDContractAddress = action.payload.EGOLDContractAddress;
             state.LendingContractAddress = action.payload.LendingContractAddress;
             state.LPTokenAddress = action.payload.LPTokenAddress;
+            
+        },
+        kycDetails:(state,action) =>{
+            state.UserAddress = action.payload.UserAddress;
+            // state.UserName = action.payload.UserName;
+            // state.PanCardDetails = action.payload.PanCardDetails;
+            // state.DocsImg = action.payload.DocsImg;
+            state.isKycStatusUpdated = action.payload.isKycStatusUpdated;
         }
     },
     
 });
 
-export const { updateABI } = tokenReducer.actions;
+
+
+
+export const { updateABI , kycDetails} = tokenReducer.actions;
 
 export default tokenReducer.reducer;

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React from "react";
 import { Link } from "react-router-dom";
 import { useWeb3React } from "@web3-react/core";
@@ -7,31 +8,20 @@ import EINRAbi from "../contracts/EINRToken.json";
 import EGoldAbi from "../contracts/EGoldToken.json";
 import LendingPoolABI from "../contracts/LendingPool.json";
 import LPTokenABI from "../contracts/LPToken.json"
-import { useDispatch } from "react-redux";
-import { updateABI } from "../reducers/stateReducer";
-
-
+import { useDispatch} from "react-redux";
+import { updateABI, kycDetails } from "../reducers/stateReducer";
+import Axios from 'axios';
 
 
 const Navbar = () => {
   const dispatch = useDispatch();
-
+  
+  // const isKycStatusUpdated = useSelector((state) => state.token.isKycStatusUpdated);
+  // const UserAddress = useSelector((state) => state.token.UserAddress);
+  
   const { active, account, library, activate, deactivate } =
     useWeb3React();
 
-  // async function balanceFetch() {
-  //   try {
-  //     if (active) {
-  //       console.log(library);
-  //       const balance = await library.eth.getBalance(account);
-  //       console.log(balance);
-  //       const balanceToken = await library.utils.fromWei(balance);
-  //       console.log(balanceToken);
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // }
 
   async function connect() {
     try {
@@ -50,20 +40,29 @@ const Navbar = () => {
       console.log(ex);
     }
   }
-
+  
   useEffect(() => {
     const connectWalletOnPageLoad = async () => {
+      
       if (localStorage?.getItem("isWalletConnected") === "true") {
         try {
           await activate(injected);
           localStorage.setItem("isWalletConnected", true);
+          //api
+          if(active){
+        const response = await Axios.get(`${process.env.REACT_APP_API_HOST}/api/getDetails/${account}}`,
+        )
+          console.log(response, "Hello user");
+          }
+          
         } catch (ex) {
           console.log(ex);
         }
       }
     };
     connectWalletOnPageLoad();
-  }, []);
+  }, [active]);
+
 
   const ConnectInstance = async () => {
     console.log(library);
@@ -79,26 +78,19 @@ const Navbar = () => {
     console.log(networkDataEGold);
     const EGoldInstance = await new library.eth.Contract(EGoldAbi.abi, networkDataEGold.address);
     console.log(EGoldInstance);
-    // const balanceOfEGold = await EGoldInstance.methods.balanceOf(account).call();
-    // const formatBalEGold = library.utils.fromWei(balanceOfEGold);
-    // console.log(formatBalEGold, "eGold Balance");
-    
+   
     //lending Pool Instance 
     const networkLendingPool = LendingPoolABI.networks[networkID];
     console.log(networkLendingPool);
     const LendingPoolInstance = await new library.eth.Contract(LendingPoolABI.abi, networkLendingPool.address);
     console.log(LendingPoolInstance);
-    // const totalBalanceEINRToken = await LendingPoolInstance.methods.getTotalOfSupplyEINRPool().call();
-    // console.log(totalBalanceEINRToken, "Total Supply");
-   
+    
     // LP token instance 
     const networkLPToken = LPTokenABI.networks[networkID];
     console.log(networkLPToken);
     const LPTokenInstance = await new library.eth.Contract(LPTokenABI.abi, networkLPToken.address);
     console.log(LPTokenInstance);
-    // const balanceOfLPToken = await LPTokenInstance.eth.getBalanceOfLPtoken().call();
-    // console.log(balanceOfLPToken); 
-
+    
     dispatch(updateABI({
       EINRAbi:EINRInstance,
       EGoldAbi:EGoldInstance,
@@ -107,8 +99,15 @@ const Navbar = () => {
       EINRContractAddress:networkDataEINR.address,
       EGOLDContractAddress:networkDataEGold.address,
       LendingContractAddress: networkLendingPool.address,
-      LPTokenAddress: networkLPToken.address
-    }))  
+      LPTokenAddress: networkLPToken.address,
+     
+    }))
+    
+    dispatch(kycDetails({
+      isKycStatusUpdated: false,
+      UserAddress:account,
+    }))
+
   };
 
   useEffect(() => {
@@ -145,7 +144,7 @@ const Navbar = () => {
             </ul>
             <button
               type="button"
-              class="btn btn-primary"
+              className="btn btn-primary"
               onClick={connect}
             >
               Connect MetaMask
@@ -159,7 +158,7 @@ const Navbar = () => {
             )}
              <button
               type="button"
-              class="btn btn-primary"
+              className="btn btn-primary"
               onClick={disconnect}
             >
             Disconnect
