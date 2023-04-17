@@ -9,7 +9,7 @@ const initialState = {
     EGOLDContractAddress:'',
     LendingContractAddress:'',
     LPTokenAddress:'',
-    UserAddress: '',
+    UserAddress:'',
     UserName:'',
     PanCardDetails:'',
     DocsImg: '',
@@ -34,9 +34,9 @@ const tokenReducer = createSlice({
         },
         kycDetails:(state,action) =>{
             state.UserAddress = action.payload.UserAddress;
-            // state.UserName = action.payload.UserName;
-            // state.PanCardDetails = action.payload.PanCardDetails;
-            // state.DocsImg = action.payload.DocsImg;
+            state.UserName = action.payload.UserName;
+            state.PanCardDetails = action.payload.PanCardDetails;
+            state.DocsImg = action.payload.DocsImg;
             state.isKycStatusUpdated = action.payload.isKycStatusUpdated;
         }
     },

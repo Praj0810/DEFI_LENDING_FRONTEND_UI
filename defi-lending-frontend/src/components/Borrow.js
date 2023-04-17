@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useWeb3React } from "@web3-react/core";
 import "../styles/Borrow.css";
+import UserKYC from './UserKYC'
+import { Link } from "react-router-dom";
 
 
 const Borrow = () => {
@@ -18,7 +20,8 @@ const Borrow = () => {
     const [egoldDeposit, setEgoldDeposited] = useState(null);
     const [einrBorrow, setEINRBorrow] = useState(null);
     const [valueInterest, setValueInterest] = useState(null);
-
+    const KYCSTATUS = useSelector((state) => state.token.isKycStatusUpdated);
+    let [kycBool, setKycBool] = useState(false);
 
     const handleInputBorrow = async (e) => {
         const calculatedEINR = await LendingPoolABI.methods
@@ -35,6 +38,7 @@ const Borrow = () => {
         });
         setFormatEGold(library.utils.fromWei(balanceOfEGold));
       };
+
     //borrow function
   const approveEgoldAmount = async () => {
     const egoldTokenApproval = await EGoldABI.methods
@@ -84,8 +88,7 @@ const Borrow = () => {
       .then((e) => setValueInterest(e))
       .catch((err) => console.log(err));
     console.log(updateRepayInt);
-    // const formattedRepayInt = library.utils.fromWei(updateRepayInt);
-    // console.log(formattedRepayInt);
+    
   };
 
   useEffect(() => {
@@ -136,76 +139,42 @@ const Borrow = () => {
 
 return(
     <>
-     <div className="cardContainer">
+      <div className="card-parent-container">
+        <div className="cardContainer">
         <div className="card">
-          <div className="card-header">Borrow Market</div>
+        <div className="card-header" style={{fontWeight:"bold"}}>Borrow Market</div>
           <div className="card-body">
-            <div>EGold Balance of User: {formatBalEGold}</div>
-            <h5>APY : 10%</h5>
-            <input
-              type="text"
-              name="title"
-              className="form-control"
-              placeholder="Enter EGold Amount"
-              onChange={handleInputBorrow}
-            ></input>
-            <div>EINR you can borrow:{onChangeValue}</div>
-
-            <div>
-              {isApproveRepay ? (
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={repayEINRAmount}
-                >
-                  Repay
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={repayEINRApproval}
-                >
-                  Approve
-                </button>
-              )}
+            <div className = "asset-list">
+               <table class="table table-striped table-hover">
+                 <thead> 
+                  <tr style={{opacity:"0.6"}}>
+                    <th scope="col">Asset</th>
+                    <th scope="col">APY</th>
+                    <th scope="col">Wallet</th>
+                    <th scope="col">Liquidity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">EINR</th>
+                    <td>8%</td>
+                    <td>0</td>
+                    <td>0</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">EGold</th>
+                    <td>8%</td>
+                    <td>{formatBalEGold}</td>
+                    <td>0</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-
-            <div>
-              {isApproveBorrow ? (
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={borrowEINRAmount}
-                >
-                  Borrow
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={approveEgoldAmount}
-                >
-                  Approve
-                </button>
-              )}
             </div>
-
-            <div>
-              <div className="repayAmount">
-                Repay Amount With Interest : {valueInterest}{" "}
-              </div>
-              <div className="textDetails">
-                Balance EINR Borrowed : {einrBorrow}
-              </div>
-              <div className="textDetails">
-                Balance EGold Deposited : {egoldDeposit}{" "}
-              </div>
-            </div>
-          </div>
+          </div>  
         </div>
-    </div>  
-    </>
+    </div>
+</>
 )
 }
 

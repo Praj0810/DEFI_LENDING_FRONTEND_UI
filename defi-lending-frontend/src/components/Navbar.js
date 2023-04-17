@@ -3,7 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useWeb3React } from "@web3-react/core";
 import { injected } from "./Connector";
-import { useEffect } from "react";
+import { useEffect} from "react";
 import EINRAbi from "../contracts/EINRToken.json";
 import EGoldAbi from "../contracts/EGoldToken.json";
 import LendingPoolABI from "../contracts/LendingPool.json";
@@ -19,10 +19,11 @@ const Navbar = () => {
   // const isKycStatusUpdated = useSelector((state) => state.token.isKycStatusUpdated);
   // const UserAddress = useSelector((state) => state.token.UserAddress);
   
-  const { active, account, library, activate, deactivate } =
+  const { active, account, library, activate, deactivate , chainId} =
     useWeb3React();
 
 
+  console.log(chainId, "check here")
   async function connect() {
     try {
       await activate(injected);
@@ -40,7 +41,19 @@ const Navbar = () => {
       console.log(ex);
     }
   }
-  
+
+  const networkName = () => {
+    switch (chainId) {
+        case 1:
+            return "Ethereum Mainnet";
+        case 80001:
+            return "Mumbai Testnet";
+        case 5:
+            return "Goerli Testnet";
+        default:
+            return "localhost";
+    } 
+}
   useEffect(() => {
     const connectWalletOnPageLoad = async () => {
       
@@ -50,19 +63,29 @@ const Navbar = () => {
           localStorage.setItem("isWalletConnected", true);
           //api
           if(active){
-        const response = await Axios.get(`${process.env.REACT_APP_API_HOST}/api/getDetails/${account}}`,
-        )
-          console.log(response, "Hello user");
-          }
-          
+        const response = await Axios.get(`${process.env.REACT_APP_API_HOST}/api/getDetails/${account}`) 
+        console.log(response, "Hello user");
+        console.log(response.data.status, "status");
+
+        if(response.data.status === true){
+          return  dispatch(kycDetails({
+            isKycStatusUpdated: true,
+          }))
+        }else{
+          return  dispatch(kycDetails({
+            isKycStatusUpdated: false,
+          }))
+        }  
+        }
+                      
         } catch (ex) {
           console.log(ex);
         }
       }
     };
+   
     connectWalletOnPageLoad();
   }, [active]);
-
 
   const ConnectInstance = async () => {
     console.log(library);
@@ -71,9 +94,7 @@ const Navbar = () => {
     console.log(networkDataEINR);
     const EINRInstance = await new library.eth.Contract(EINRAbi.abi,networkDataEINR.address);
     console.log(EINRInstance);
-    
-    
-    //EGold Instance
+      //EGold Instance
     const networkDataEGold = EGoldAbi.networks[networkID];
     console.log(networkDataEGold);
     const EGoldInstance = await new library.eth.Contract(EGoldAbi.abi, networkDataEGold.address);
@@ -99,16 +120,10 @@ const Navbar = () => {
       EINRContractAddress:networkDataEINR.address,
       EGOLDContractAddress:networkDataEGold.address,
       LendingContractAddress: networkLendingPool.address,
-      LPTokenAddress: networkLPToken.address,
-     
+      LPTokenAddress: networkLPToken.address,   
     }))
-    
-    dispatch(kycDetails({
-      isKycStatusUpdated: false,
-      UserAddress:account,
-    }))
-
   };
+
 
   useEffect(() => {
     if (active) {
@@ -118,10 +133,10 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="navbar navbar-expand-lg navbar-light bg-light">
+      <nav className="navbar navbar-expand-lg navbar-light bg-black">
         <div className="container-fluid">
-          <Link className="navbar-brand" href=" # ">
-            DeFi Lending App
+          <Link className="navbar-brand" href=" # " style={{color:"cyan", fontWeight: "bold"}}>
+            DEFI LENDING 
           </Link>
           <button
             className="navbar-toggler"
@@ -137,37 +152,41 @@ const Navbar = () => {
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
               <li className="nav-item">
-                <a className="nav-link active" aria-current="page" href=" # ">
-                  Home
+                <a className="nav-link active" aria-current="page" href=" # " style={{color:"cyan", fontWeight: "bold", marginLeft:"2rem"}}>
+                  HOME
                 </a>
               </li>
             </ul>
-            <button
+            {!active && <button
               type="button"
               className="btn btn-primary"
               onClick={connect}
+              style={{color:"cyan", background:"black" , border:"black",fontWeight: "bold"}}
             >
-              Connect MetaMask
-            </button>
-            {active ? (
+              Connect MetaMask 
+            </button>}
+            {active && (
               <span>
-              <b>{account}</b>
+              <div>{chainId && <div><b style={{color:"cyan", marginRight:"10rem" }}>{networkName()}</b></div>}</div>
+              
+              <b style={{color:"cyan" }}>{account}</b>
+              
               </span>
-            ) : (
-              <span>Not connected</span>
-            )}
-             <button
+            ) }
+             {active && <button
               type="button"
               className="btn btn-primary"
               onClick={disconnect}
+              style={{color:"cyan" , background:"black" , border:"black" , fontWeight: "bold"}}
             >
             Disconnect
-            </button>  
+            </button>  }
           </div>
         </div>
       </nav>
     </>
   );
 };
+
 
 export default Navbar;

@@ -1,29 +1,33 @@
 import Axios from "axios";
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
 import FormData from "form-data";
 import { kycDetails } from "../reducers/stateReducer";
 import { useDispatch } from "react-redux";
+import { useWeb3React } from "@web3-react/core";
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
 
-const KYCUserForm = () => {
+
+const KYCUserForm = (props) => {
+  const {show, onHide, kycBool} = props;
   const dispatch = useDispatch();
-  const account_address = useSelector((state) => state.token);
+  const { account } = useWeb3React();
   const formData = new FormData();
   const [name, setName] = useState("");
-  const [userNameTouch, setUserNameTouch] = useState("");
+  // const [userNameTouch, setUserNameTouch] = useState("");
   const [panDetails, setPanDetails] = useState("");
-  const [panNumberTouch, setPanNumberTouch] = useState("");
+  // const [panNumberTouch, setPanNumberTouch] = useState("");
   const [filePath, setFilePath] = useState("");
-  const [fileTouch, setFileTouch] = useState("");
+  // const [fileTouch, setFileTouch] = useState("");
+  const [shows, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
 
-  let formIsValid = false;
 
-  const userNameIsValid = name.trim() !== "";
-  const userNameIsInvalid = !userNameIsValid && userNameTouch;
-  const panNumberIsValid = name.trim() !== "";
-  const panNumberIsInvalid = !panNumberIsValid && panNumberTouch;
-  const filePathIsValid = filePath !== "";
-  const fileIsInvalid = !filePathIsValid && fileTouch;
+  // let formIsValid = false;
+  // let [kycBool, setKycBool] = useState(false);
+
 
   const handleName = (event) => {
     setName(event.target.value);
@@ -37,24 +41,24 @@ const KYCUserForm = () => {
     setFilePath(event.target.files[0]);
   };
 
-  const touchHandleName = (event) => {
-    setUserNameTouch(true);
-  };
+  // const touchHandleName = (event) => {
+  //   setUserNameTouch(true);
+  // };
 
-  const touchHandlePanDetails = (event) => {
-    setPanNumberTouch(true);
-  };
+  // const touchHandlePanDetails = (event) => {
+  //   setPanNumberTouch(true);
+  // };
 
-  const touchHandleFile = (event) => {
-    setFileTouch(true);
-  };
+  // const touchHandleFile = (event) => {
+  //   setFileTouch(true);
+  // };
 
-  if (userNameIsValid && panNumberIsValid && filePathIsValid) {
-    formIsValid = true;
-  }
+  // if (userNameIsValid && panNumberIsValid && filePathIsValid) {
+  //   formIsValid = true;
+  // }
 
   const urlPost = `${process.env.REACT_APP_API_HOST}/api/addKYCDetails`;
-  console.log(urlPost);
+  console.log(urlPost, "here");
 
   const config = {
     headers: {
@@ -64,131 +68,83 @@ const KYCUserForm = () => {
 
   const handleUserKYCDetail = async (event) => {
     event.preventDefault();
-    // formData.append("account", account_address.UserAddress);
-    // formData.append("userName", name);
-    // formData.append("panDetails", panDetails);
-    // formData.append("img", filePath);
 
-    formData.append('User_Account_Address', account_address.UserAddress);
-    formData.append('UserName',name);
-    formData.append('PanCard_Number', panDetails);
-    formData.append('kycDocs', filePath);
-    setUserNameTouch(true);
-    setPanNumberTouch(true);
-    setFileTouch(true);
-    if (userNameIsInvalid && panNumberIsInvalid && fileIsInvalid) {
-      return;
-    }
+    formData.append("userAccountAddress", account);
+    formData.append("userName", name);
+    formData.append("panCardNumber", panDetails);
+    formData.append("kycDocs", filePath);
+    // setUserNameTouch(true);
+    // setPanNumberTouch(true);
+    // setFileTouch(true);
+    // if (userNameIsInvalid && panNumberIsInvalid && fileIsInvalid) {
+    //   return;
+    // }
     try {
       const response = await Axios.post(urlPost, formData, config);
       alert("KYC done successfully");
-      dispatch(kycDetails({
-        isKycStatusUpdated: true,
-      }))
+      dispatch(
+        kycDetails({
+          isKycStatusUpdated: true,
+        })
+      );
 
       console.log(response, "get new response here");
     } catch (error) {
       console.log(error);
       alert("Please enter the Details");
     }
-    setUserNameTouch(false);
-    setPanNumberTouch(false);
-    setFileTouch(false);
+    // setUserNameTouch(false);
+    // setPanNumberTouch(false);
+    // setFileTouch(false);
     setName("");
     setPanDetails("");
     setFilePath("");
-    
-    
   };
 
-  return (
-    <div>
-      <div
-        className="modal fade"
-        id="staticBackdrop"
-        data-bs-backdrop="static"
-        data-bs-keyboard="false"
-        aria-labelledby="staticBackdropLabel"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title" id="staticBackdropLabel">
-                Fill your KYC details Here!!
-              </h5>
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div className="modal-body">
-              <form onSubmit={handleUserKYCDetail} className="modal-form">
-                <div className="modal_form_inner">
-                  <div>
-                    <label className="label">Name :</label>
-                    <input
-                      type="text"
-                      className="form-control form-control-input "
-                      placeholder="Enter Name"
-                      onChange={handleName}
-                      onBlur={touchHandleName}
-                    />
-                    {userNameIsInvalid && (
-                      <p className="error-text">Name should not be empty</p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="label">Pan Card Number : </label>
-                    <input
-                      type="text"
-                      className="form-control form-control-input "
-                      placeholder="Enter Pan Card Number"
-                      onChange={handlePanDetails}
-                      onBlur={touchHandlePanDetails}
-                    />
-                    {userNameIsInvalid && (
-                      <p className="error-text">
-                        Please Enter Pan Card Details
-                      </p>
-                    )}
-                  </div>
-                  
-                    <div className="form-group">
-                      <input
-                        type="file"
-                        name="img"
-                        id="file"
-                        className="form-control form-control-input"
-                        placeholder="Upload Documents"
-                        onChange={handleFile}
-                        onBlur={touchHandleFile}
-                      />
-                      {fileIsInvalid && (
-                        <p className="error-text">File is Not Uploaded</p>
-                      )}
-                    </div>
-                    <div className="text-center">
-                        <button
-                    disabled={!formIsValid}
-                    className="btn btn-primary"
-                    type="submit"
-                  >
-                    Submit
-                  </button>
-                </div>
-              
+  return(
+    <>
+    {kycBool && (<Button variant="primary" onClick={handleShow} style={{ background: "red" , marginLeft:"550px", marginTop:"10px"}}>
+    Click here for KYC Form!!
+    </Button>)}
+      <Modal show={shows} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title> Fill your KYC details Here!!</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleUserKYCDetail}>
+            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+              <Form.Label>Name :</Form.Label>
+              <Form.Control 
+                type="text"
+                placeholder="Enter Name"
+                autoFocus
+                onChange={handleName}
+                />
+            </Form.Group>
+            <Form.Group
+              className="mb-3"
+              controlId="exampleForm.ControlInput1"
+            >
+              <Form.Label>Pan Card Number : </Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter Name"
+                autoFocus
+                onChange={handlePanDetails}
                 
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+              />
+            </Form.Group>
+            <Form.Group  className="mb-3" controlId="exampleForm.ControlTextarea1">
+              <Form.Control  type="file" name="img" id="file" placeholder="Upload Documents" onChange={handleFile} />
+            </Form.Group>
+            <Button variant="primary" type="Submit">
+            Save  & Submit
+          </Button>
+          </Form>
+        </Modal.Body>
+      </Modal>
+      </>
 
+    )
+  }
 export default KYCUserForm;
