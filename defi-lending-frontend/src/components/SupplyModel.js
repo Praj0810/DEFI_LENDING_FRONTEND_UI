@@ -29,7 +29,7 @@ const SupplyModel = (props) => {
   console.log(KYCSTATUS, "get status")
   let [isApproveSupply, setIsApproveSupply] = useState(false);
   
-  const [valWithInt, setValueWithInterest] = useState(null);
+  
   const [formatBalEGold, setFormatEGold] = useState(null);
 
   const handleInputSupply = (e) => {
@@ -38,7 +38,7 @@ const SupplyModel = (props) => {
 
   const [formatBalEINR, setFormatBalEINR] = useState(null);
 
-  const [einrDeposit, setEinrDeposited] = useState(null);
+  
 
   const getBalanceEINR = async () => {
     const balanceOfEINR = await EINRABI.methods.balanceOf(account).call({
@@ -75,45 +75,28 @@ const SupplyModel = (props) => {
     console.log(depositAmount);
   };
 
-  //get balance of User Depositing EINR token:
-  const getEINRDeposited = async () => {
-    const einrDeposited = await LendingPoolABI.methods
-      .getOwnerDepositEINRBalance(account)
-      .call({
-        from: account,
-      });
-    setEinrDeposited(library.utils.fromWei(einrDeposited));
-  };
+  // //get balance of User Depositing EINR token:
+  // const getEINRDeposited = async () => {
+  //   const einrDeposited = await LendingPoolABI.methods
+  //     .getOwnerDepositEINRBalance(account)
+  //     .call({
+  //       from: account,
+  //     });
+  //   setEinrDeposited(library.utils.fromWei(einrDeposited));
+  // };
 
-  //withdraw amount with Interest function
-  const AmountWithdrawInterest = async () => {
-    const updateWithdrawInt = await LendingPoolABI.methods
-      .getAmountWithInterest()
-      .call({
-        from: account,
-      });
-    setValueWithInterest(updateWithdrawInt);
-    console.log(updateWithdrawInt);
-  };
+  // //withdraw amount with Interest function
+  // const AmountWithdrawInterest = async () => {
+  //   const updateWithdrawInt = await LendingPoolABI.methods
+  //     .getAmountWithInterest()
+  //     .call({
+  //       from: account,
+  //     });
+  //   setValueWithInterest(updateWithdrawInt);
+  //   console.log(updateWithdrawInt);
+  // };
 
-  useEffect(() => {
-    if (account && LendingPoolABI) {
-      AmountWithdrawInterest();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [account, LendingPoolABI]);
-
-  useEffect(() => {
-    let interval;
-    if (account !== null) {
-      interval = setInterval(() => {
-        AmountWithdrawInterest();
-      }, 60000);
-    }
-    return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [account, LendingPoolABI]);
-
+  
   //withdraw
   const withDrawEINRAmount = async () => {
     const withDrawAmount = await LendingPoolABI.methods
@@ -129,7 +112,7 @@ const SupplyModel = (props) => {
     if (account && EINRABI && EGoldABI && LendingPoolABI) {
       getBalanceEINR();
       getBalancEGold();
-      getEINRDeposited();
+     
     //   setthresholdLimitLender(5000);
     //   console.log(thresholdLimitLender, "thresholdLimitLender");
         // setTimeout(async () => {
@@ -180,14 +163,6 @@ const SupplyModel = (props) => {
     </Button> 
     )} */}
         <UserKYC  kycBool={kycBool} />
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={withDrawEINRAmount}
-          style={{marginLeft:"10px", marginTop:"32px"}}
-        >
-          Withdraw
-        </button>
 
         <div>
           {isApproveSupply ? (
@@ -195,8 +170,8 @@ const SupplyModel = (props) => {
               type="button"
               className="btn btn-primary"
               onClick={supplyEINRAmount}
-              style={{marginLeft:"120px", marginTop:"-64px"}}
-            >
+              style={{marginLeft:"10px", marginTop:"32px"}}
+        >
               Supply
             </button>
           ) : (
@@ -204,19 +179,21 @@ const SupplyModel = (props) => {
               type="button"
               className="btn btn-primary"
               onClick={approveEINRAmount}
-            style={{marginLeft:"120px", marginTop:"-64px"}}>
+              style={{marginLeft:"10px", marginTop:"32px"}}
+        >
               Approve Supply
             </button>
           )}
         </div>
-        <div>
-          <div className="repayAmount">
-            Withdraw Amount With Interest : {valWithInt}
-          </div>
-          <div className="textDetails">
-            Balance EINR Deposited : {einrDeposit}{" "}
-          </div>
-        </div>
+
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={withDrawEINRAmount}
+          style={{marginLeft:"169px", marginTop:"-64px"}}
+          >
+          Withdraw
+        </button>
       </Modal.Body>
     </Modal>
   );

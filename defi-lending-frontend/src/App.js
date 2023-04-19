@@ -15,8 +15,8 @@ function App() {
       <Router>
         <Navbar/>
         <LaunchPage/>
-        <Route path='\adminSignUp' element={AdminSignUp}></Route>
-        <Route path='\adminLogin' element={AdminLogin}></Route>
+        {/* <Route path='\adminSignUp' element={AdminSignUp}></Route>
+        <Route path='\adminLogin' element={AdminLogin}></Route> */}
       </Router>
     </Provider>  
     );

@@ -15,23 +15,16 @@ const Deposit = () => {
 
   const LendingPoolABI = useSelector((state) => state.token.LendingPoolAbi);
   const EGoldABI = useSelector((state) => state.token.EGoldAbi);
-  // const lendingPoolContractAddress = useSelector(
-  //   (state) => state.token.LendingContractAddress
-  // );
   // const KYCSTATUS = useSelector((state) => state.token.isKycStatusUpdated);
   // let [isApproveSupply, setIsApproveSupply] = useState(false);
   // let [kycBool, setKycBool] = useState(false);
   // const [valWithInt, setValueWithInterest] = useState(null);
   const [formatBalEGold, setFormatEGold] = useState(null);
 
-  // const handleInputSupply = (e) => {
-  //   setValue(e.target.value);
-  // };
-
   const [formatBalEINR, setFormatBalEINR] = useState(null);
   const [totalSupply, setTotalSupply] = useState();
-
-  // const [einrDeposit, setEinrDeposited] = useState(null);
+  const [einrDeposit, setEinrDeposited] = useState(null);
+  const [valWithInt, setValueWithInterest] = useState(null);
 
   const getBalanceEINR = async () => {
     const balanceOfEINR = await EINRABI.methods.balanceOf(account).call({
@@ -57,82 +50,44 @@ const Deposit = () => {
     setTotalSupply(totalBalanceEINRToken);
   };
 
-  // //deposit approval function
-  // const approveEINRAmount = async () => {
-  //   const einrtokenApproval = await EINRABI.methods
-  //     .approve(lendingPoolContractAddress, library.utils.toWei(value, "ether"))
-  //     .send({
-  //       from: account,
-  //     });
-  //   setIsApproveSupply(true);
-  //   console.log(einrtokenApproval);
-  // };
-
-  //deposit EINR token
-  // const supplyEINRAmount = async () => {
-  //   const depositAmount = await LendingPoolABI.methods
-  //     .depositeINRToken(library.utils.toWei(value, "ether"))
-  //     .send({
-  //       from: account,
-  //     });
-  //   console.log(depositAmount);
-  // };
-
-  //get balance of User Depositing EINR token:
-  // const getEINRDeposited = async () => {
-  //   const einrDeposited = await LendingPoolABI.methods
-  //     .getOwnerDepositEINRBalance(account)
-  //     .call({
-  //       from: account,
-  //     });
-  //   setEinrDeposited(library.utils.fromWei(einrDeposited));
-  // };
+  // get balance of User Depositing EINR token:
+  const getEINRDeposited = async () => {
+    const einrDeposited = await LendingPoolABI.methods
+      .getOwnerDepositEINRBalance(account)
+      .call({
+        from: account,
+      });
+    setEinrDeposited(library.utils.fromWei(einrDeposited));
+  };
 
   //withdraw amount with Interest function
-  // const AmountWithdrawInterest = async () => {
-  //   const updateWithdrawInt = await LendingPoolABI.methods
-  //     .getAmountWithInterest()
-  //     .call({
-  //       from: account,
-  //     });
-  //   setValueWithInterest(updateWithdrawInt);
-  //   console.log(updateWithdrawInt);
-  // };
+  const AmountWithdrawInterest = async () => {
+    const updateWithdrawInt = await LendingPoolABI.methods
+      .getAmountWithInterest()
+      .call({
+        from: account,
+      });
+    setValueWithInterest(updateWithdrawInt);
+    console.log(updateWithdrawInt);
+  };
 
-  // useEffect(() => {
-  //   if (account && LendingPoolABI) {
-  //     AmountWithdrawInterest();
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [account, LendingPoolABI]);
-
-  // useEffect(() => {
-  //   let interval;
-  //   if (account !== null) {
-  //     interval = setInterval(() => {
-  //       AmountWithdrawInterest();
-  //     }, 60000);
-  //   }
-  //   return () => clearInterval(interval);
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [account, LendingPoolABI]);
-
-  // //withdraw
-  // const withDrawEINRAmount = async () => {
-  //   const withDrawAmount = await LendingPoolABI.methods
-  //     .withDrawEINRToken(value)
-  //     .send({
-  //       from: account,
-  //     });
-  //   console.log(withDrawAmount);
-  // };
+  useEffect(() => {
+    let interval;
+    if (account !== null) {
+      interval = setInterval(() => {
+        AmountWithdrawInterest();
+      }, 60000);
+    }
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [account, LendingPoolABI]);
 
   useEffect(() => {
     if (account && EINRABI && EGoldABI && LendingPoolABI) {
       getBalanceEINR();
       getBalancEGold();
       getTotalSupplyBalance();
-      //getEINRDeposited();
+      getEINRDeposited();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [account, EINRABI, EGoldABI, LendingPoolABI]);
@@ -140,10 +95,24 @@ const Deposit = () => {
   return (
     <>
       <div className="headDetails">Total Supply of EINR : {totalSupply}</div>
-      <div></div>
-
-      <div style={{ display: "flex", justifyContent: "space-evenly" }}>
-        <div className="card-parent-container">
+      <div style={{ display: "flex", justifyContent: "space-evenly", marginTop:"-85px"}}>
+        <div className="card-parent-container" style={{ display: "flex", flexDirection: "column" }}>
+        <>
+        <div style={{marginLeft: "-235px", marginBottom: "10px"}}>
+          <div
+            className="textDetails"
+            style={{ color: "cyan", marginLeft: "200px" }}
+          >
+            Balance EINR Deposited : {einrDeposit}{" "}
+          </div>
+          <div
+            className="textDetails"
+            style={{ color: "cyan", marginLeft: "200px" }}
+          >
+            Withdraw Amount With Interest : {valWithInt}
+          </div>
+        </div>
+        </>
           <div className="cardContainer">
             <div className="card">
               <div className="card-header" style={{ fontWeight: "bold" }}>
@@ -181,7 +150,9 @@ const Deposit = () => {
                           <td>
                             <Button
                               variant="primary"
-                              onClick={() => setShow(true)} style={{marginTop:"-2px"}}>
+                              onClick={() => setShow(true)}
+                              style={{ marginTop: "-2px" }}
+                            >
                               Supply
                             </Button>
                             <SupplyModel

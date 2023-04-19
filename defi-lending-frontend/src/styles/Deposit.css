@@ -35,16 +35,13 @@
 
 }
 
-.textDetails{
-    font-style:normal;
-    margin-top: 10px;
-}
 
 .headDetails{
     margin-top:1px;
     margin-left: 600px;
     color: cyan;
     font-weight: bold;
+    padding: auto;
 }
 
 .repayAmount{
