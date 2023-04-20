@@ -18,7 +18,7 @@ const Borrow = () => {
     (state) => state.token.LendingContractAddress
   );
   
-  const [onChangeValue, setOnChangeValue] = useState(null);
+
   const [egoldDeposit, setEgoldDeposited] = useState(null);
   const [einrBorrow, setEINRBorrow] = useState(null);
   const [valueInterest, setValueInterest] = useState(null);
@@ -26,14 +26,7 @@ const Borrow = () => {
   let [kycBool, setKycBool] = useState(false);
   const [show, setShow] = useState(false);
 
-  const handleInputBorrow = async (e) => {
-    const calculatedEINR = await LendingPoolABI.methods
-      .calculatedEINRloan(library.utils.toWei(e.target.value, "ether"))
-      .call();
-    setOnChangeValue(calculatedEINR);
-    setValue(e.target.value);
-  };
-
+ 
   const getBalancEGold = async () => {
     const balanceOfEGold = await EGoldABI.methods.balanceOf(account).call({
       from: account,
@@ -41,25 +34,7 @@ const Borrow = () => {
     setFormatEGold(library.utils.fromWei(balanceOfEGold));
   };
 
-  // //borrow function
-  // const approveEgoldAmount = async () => {
-  //   const egoldTokenApproval = await EGoldABI.methods
-  //     .approve(lendingPoolContractAddress, library.utils.toWei(value, "ether"))
-  //     .send({
-  //       from: account,
-  //     });
-  //   setIsApproveBorrow(true);
-  //   console.log(egoldTokenApproval);
-  // };
-  // const borrowEINRAmount = async () => {
-  //   const depositEgoldAmount = await LendingPoolABI.methods
-  //     .borrowEINRLoan(library.utils.toWei(value, "ether"))
-  //     .send({
-  //       from: account,
-  //     });
-  //   console.log(depositEgoldAmount);
-  // };
-
+  
   // get balance of user Depositing EGold Tokens
   const getGoldDeposited = async () => {
     const egoldDeposited = await LendingPoolABI.methods
@@ -87,7 +62,7 @@ const Borrow = () => {
       .call({
         from: account,
       })
-      .then((e) => setValueInterest(e))
+      .then((e) => setValueInterest(library.utils.fromWei(e)))
       .catch((err) => console.log(err));
     console.log(updateRepayInt);
   };

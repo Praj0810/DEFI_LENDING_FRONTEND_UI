@@ -8441,12 +8441,12 @@
     "80001": {
       "events": {},
       "links": {},
-      "address": "0x11a319dAD0F98B48Cb845D74949a51af28126a5E",
-      "transactionHash": "0xe4b0bdc07d710a57a6c50c06d69dfb30f40d339abf63d9275a117488a3effc82"
+      "address": "0x6974CaC8f32e3eA2a15B310974D938e0D78FfC76",
+      "transactionHash": "0x02201af2445aff02f8cf407fbdc177d7a9be9bee92593beb15f2e0514ca411c9"
     }
   },
   "schemaVersion": "3.4.13",
-  "updatedAt": "2023-04-19T13:13:55.542Z",
+  "updatedAt": "2023-04-20T09:14:53.461Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",

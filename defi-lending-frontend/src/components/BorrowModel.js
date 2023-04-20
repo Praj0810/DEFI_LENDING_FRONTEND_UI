@@ -26,11 +26,16 @@ const BorrowModel = (props) => {
   const [formatBalEGold, setFormatEGold] = useState(null);
   let [isApproveBorrow, setIsApproveBorrow] = useState(false);
   let [isApproveRepay, setIsApproveRepay] = useState(false);
+  const [onChangeValue, setOnChangeValue] = useState(null);
 
-  const handleInputSupply = (e) => {
+  const handleInputBorrow = async (e) => {
+    const calculatedEINR = await LendingPoolABI.methods
+      .calculatedEINRloan(library.utils.toWei(e.target.value, "ether"))
+      .call();
+    setOnChangeValue(library.utils.fromWei(calculatedEINR, "ether"));
     setValue(e.target.value);
   };
- 
+
   const getBalancEGold = async () => {
     const balanceOfEGold = await EGoldABI.methods.balanceOf(account).call({
       from: account,
@@ -50,7 +55,7 @@ const BorrowModel = (props) => {
   };
   const borrowEINRAmount = async () => {
     const depositEgoldAmount = await LendingPoolABI.methods
-      .borrowEINRLoan(library.utils.toWei(value, "ether"))
+      .borrowEINRLoan(library.utils.toWei((value), "ether"))
       .send({
         from: account,
       });
@@ -60,7 +65,7 @@ const BorrowModel = (props) => {
   //repay EINR function
   const repayEINRApproval = async () => {
     const repayAmountApproval = await EINRABI.methods
-      .approve(lendingPoolContractAddress, value)
+      .approve(lendingPoolContractAddress, library.utils.toWei(value))
       .send({
         from: account,
       });
@@ -68,10 +73,9 @@ const BorrowModel = (props) => {
     console.log(repayAmountApproval);
   };
   const repayEINRAmount = async () => {
-    const repayAmount = await LendingPoolABI.methods.repayEINRLoan(value).send({
+    const repayAmount = await LendingPoolABI.methods.repayEINRLoan(library.utils.toWei(parseInt(value, "ether").toString())).send({
       from: account,
     });
-    console.log(repayAmount);
   };
 
   useEffect(() => {
@@ -107,8 +111,9 @@ const BorrowModel = (props) => {
           name="title"
           className="form-control"
           placeholder="Enter Collateral Amount"
-          onChange={handleInputSupply}
+          onChange={handleInputBorrow}
         ></input>
+        <div>EINR you can borrow:{onChangeValue}</div>
         <UserKYC  kycBool={kycBool} />
 
         <div>

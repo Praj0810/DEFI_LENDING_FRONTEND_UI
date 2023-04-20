@@ -75,32 +75,11 @@ const SupplyModel = (props) => {
     console.log(depositAmount);
   };
 
-  // //get balance of User Depositing EINR token:
-  // const getEINRDeposited = async () => {
-  //   const einrDeposited = await LendingPoolABI.methods
-  //     .getOwnerDepositEINRBalance(account)
-  //     .call({
-  //       from: account,
-  //     });
-  //   setEinrDeposited(library.utils.fromWei(einrDeposited));
-  // };
-
-  // //withdraw amount with Interest function
-  // const AmountWithdrawInterest = async () => {
-  //   const updateWithdrawInt = await LendingPoolABI.methods
-  //     .getAmountWithInterest()
-  //     .call({
-  //       from: account,
-  //     });
-  //   setValueWithInterest(updateWithdrawInt);
-  //   console.log(updateWithdrawInt);
-  // };
-
   
   //withdraw
   const withDrawEINRAmount = async () => {
     const withDrawAmount = await LendingPoolABI.methods
-      .withDrawEINRToken(value)
+      .withDrawEINRToken(library.utils.toWei(value))
       .send({
         from: account,
       });

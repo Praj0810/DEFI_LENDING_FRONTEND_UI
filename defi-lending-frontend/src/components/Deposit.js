@@ -47,7 +47,7 @@ const Deposit = () => {
         from: account,
       });
     console.log(totalBalanceEINRToken, "Total Supply");
-    setTotalSupply(totalBalanceEINRToken);
+    setTotalSupply(library.utils.fromWei(totalBalanceEINRToken));
   };
 
   // get balance of User Depositing EINR token:
@@ -67,7 +67,7 @@ const Deposit = () => {
       .call({
         from: account,
       });
-    setValueWithInterest(updateWithdrawInt);
+    setValueWithInterest(library.utils.fromWei(updateWithdrawInt));
     console.log(updateWithdrawInt);
   };
 
